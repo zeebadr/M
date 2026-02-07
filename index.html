@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Quiz Challenge</title>
+    <title>Mcompetition - تحدي القرآن اليومي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -13,26 +13,37 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --header-gradient: linear-gradient(to left, #3a7bd5, #00d2ff);
+            --progress-gradient: linear-gradient(to left, #ff8a00, #da1b60);
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+            --selected-color: #3a7bd5;
+            --shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
         body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background: var(--primary-gradient);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            line-height: 1.6;
         }
         
         .container {
             background-color: white;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow);
             width: 100%;
             max-width: 800px;
             overflow: hidden;
         }
         
         .header {
-            background: linear-gradient(to right, #3a7bd5, #00d2ff);
+            background: var(--header-gradient);
             color: white;
             padding: 25px;
             text-align: center;
@@ -52,7 +63,7 @@
         .quiz-info {
             position: absolute;
             top: 10px;
-            right: 15px;
+            left: 15px;
             font-size: 0.9rem;
             background: rgba(255, 255, 255, 0.2);
             padding: 5px 10px;
@@ -63,17 +74,28 @@
             padding: 30px;
         }
         
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
         .progress-bar {
             height: 10px;
             background-color: #f0f0f0;
             border-radius: 5px;
-            margin-bottom: 30px;
             overflow: hidden;
         }
         
         .progress {
             height: 100%;
-            background: linear-gradient(to right, #ff8a00, #da1b60);
+            background: var(--progress-gradient);
             width: 0%;
             transition: width 0.5s ease;
         }
@@ -90,6 +112,7 @@
             margin-bottom: 25px;
             color: #333;
             font-weight: 500;
+            text-align: right;
         }
         
         .options {
@@ -100,13 +123,16 @@
         }
         
         .option {
-            padding: 15px;
+            padding: 18px 15px;
             background-color: #f8f9fa;
             border: 2px solid #e9ecef;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 500;
+            text-align: right;
+            display: flex;
+            align-items: center;
         }
         
         .option:hover {
@@ -115,27 +141,46 @@
         }
         
         .option.selected {
-            background-color: #3a7bd5;
+            background-color: var(--selected-color);
             color: white;
-            border-color: #3a7bd5;
+            border-color: var(--selected-color);
         }
         
         .option.correct {
-            background-color: #4caf50;
+            background-color: var(--correct-color);
             color: white;
-            border-color: #4caf50;
+            border-color: var(--correct-color);
         }
         
         .option.incorrect {
-            background-color: #f44336;
+            background-color: var(--incorrect-color);
             color: white;
-            border-color: #f44336;
+            border-color: var(--incorrect-color);
+        }
+        
+        .option-label {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            text-align: center;
+            line-height: 30px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        
+        .selected .option-label,
+        .correct .option-label,
+        .incorrect .option-label {
+            background: rgba(255, 255, 255, 0.5);
         }
         
         .navigation {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 15px;
         }
         
         .btn {
@@ -146,14 +191,15 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-width: 120px;
         }
         
         .btn-next {
-            background: linear-gradient(to right, #3a7bd5, #00d2ff);
+            background: var(--header-gradient);
             color: white;
         }
         
-        .btn-next:hover {
+        .btn-next:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
@@ -165,7 +211,19 @@
             box-shadow: none;
         }
         
-        .result-container {
+        .btn-prev {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-prev:hover {
+            background: #5a6268;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-container,
+        .already-completed {
             text-align: center;
             padding: 40px;
             display: none;
@@ -190,7 +248,7 @@
         }
         
         .btn-restart {
-            background: linear-gradient(to right, #ff8a00, #da1b60);
+            background: var(--progress-gradient);
             color: white;
             margin-top: 20px;
         }
@@ -200,24 +258,50 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
-        .instructions {
+        .score-breakdown {
             background-color: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
-            font-size: 0.9rem;
-            color: #666;
+            text-align: right;
         }
         
-        .instructions h3 {
-            margin-bottom: 10px;
+        .score-breakdown h3 {
+            margin-bottom: 15px;
             color: #3a7bd5;
         }
         
-        .already-completed {
-            text-align: center;
-            padding: 40px;
-            display: none;
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .score-item:last-child {
+            border-bottom: none;
+        }
+        
+        .score-status {
+            font-weight: bold;
+        }
+        
+        .correct-answer {
+            color: var(--correct-color);
+        }
+        
+        .incorrect-answer {
+            color: var(--incorrect-color);
+        }
+        
+        .timer {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
         }
         
         @media (max-width: 768px) {
@@ -232,6 +316,14 @@
             .question {
                 font-size: 1.2rem;
             }
+            
+            .navigation {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -239,16 +331,23 @@
     <div class="container">
         <div class="header">
             <h1>Mcompetition</h1>
-            <p>Test your knowledge with our daily updated quiz!</p>
-            <div class="quiz-info" id="quiz-info">Daily Challenge</div>
+            <p>اختبر معلوماتك في القرآن والعلوم الإسلامية</p>
+            <div class="quiz-info" id="quiz-info">التحدي اليومي</div>
+            <div class="timer" id="timer"></div>
         </div>
         
         <div class="quiz-container" id="quiz-container">
-            <div class="progress-bar">
-                <div class="progress" id="progress"></div>
+            <div class="progress-container">
+                <div class="progress-labels">
+                    <span>السؤال الحالي: <span id="current-q">1</span></span>
+                    <span>الأسئلة المتبقية: <span id="remaining-q">9</span></span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
             </div>
             
-            <div class="question-number" id="question-number">Question 1 of 10</div>
+            <div class="question-number" id="question-number">السؤال 1 من 10</div>
             <div class="question" id="question"></div>
             
             <div class="options" id="options">
@@ -256,26 +355,30 @@
             </div>
             
             <div class="navigation">
-                <div></div> <!-- Empty div for spacing -->
-                <button class="btn btn-next" id="next-btn">Next Question</button>
+                <button class="btn btn-prev" id="prev-btn" style="display: none;">السابق</button>
+                <button class="btn btn-next" id="next-btn">التالي</button>
             </div>
-            
         </div>
         
         <div class="result-container" id="result-container">
             <div class="emoji" id="emoji">🎉</div>
             <div class="score" id="score">0/10</div>
-            <div class="message" id="message">Well done!</div>
-            <p>Thank you for participating in today's quiz competition!</p>
-            <button class="btn btn-restart" id="restart-btn">Try Again Tomorrow</button>
+            <div class="message" id="message">أحسنت!</div>
+            <p>شكراً لمشاركتك في مسابقة اليوم!</p>
+            
+            <div class="score-breakdown" id="score-breakdown">
+                <!-- Score breakdown will be inserted here -->
+            </div>
+            
+            <button class="btn btn-restart" id="restart-btn">جرب مرة أخرى غداً</button>
         </div>
         
         <div class="already-completed" id="already-completed">
             <div class="emoji">⏰</div>
-            <div class="message">You've already completed today's quiz!</div>
-            <p>Come back tomorrow for a new challenge.</p>
-            <div class="score" id="previous-score">Previous Score: 0/10</div>
-            <button class="btn btn-restart" id="view-results-btn">View Your Results</button>
+            <div class="message">لقد أكملت اختبار اليوم بالفعل!</div>
+            <p>ارجع غداً لتحدي جديد.</p>
+            <div class="score" id="previous-score">النقاط السابقة: 0/10</div>
+            <button class="btn btn-restart" id="view-results-btn">عرض النتائج</button>
         </div>
     </div>
 
@@ -292,7 +395,8 @@
                     c: "5",
                     d: "7"
                 },
-                correctAnswer: "b"
+                correctAnswer: "b",
+                explanation: "ذكر اسم النبي محمد صلى الله عليه وسلم 4 مرات في القرآن الكريم"
             },
             {
                 question: "من هو النبي الذي ذكر 69 مرة في القرآن؟",
@@ -302,7 +406,8 @@
                     c: "محمد",
                     d: "نوح"
                 },
-                correctAnswer: "b"
+                correctAnswer: "b",
+                explanation: "النبي إبراهيم عليه السلام ذكر 69 مرة في القرآن"
             },
             {
                 question: "كم كان عمر النبي محمد صلى الله عليه وسلم عندما توفيت أمه؟",
@@ -312,47 +417,52 @@
                     c: "بين الخامسة و السادسة",
                     d: "بين السادسة و السابعة"
                 },
-                correctAnswer: "d"
+                correctAnswer: "d",
+                explanation: "توفيت أمه آمنة بنت وهب وهو في السادسة من عمره"
             },
             {
-                question: " قال تعالى في سورة المدثر: (والرجز فاهجر (5)) ما المقصود بالرجز؟",
+                question: "قال تعالى في سورة المدثر: (والرجز فاهجر (5)) ما المقصود بالرجز؟",
                 options: {
                     a: "الكذب",
                     b: "الاوثان",
                     c: "الخمر",
                     d: "الجدال"
                 },
-                correctAnswer: "b"
+                correctAnswer: "b",
+                explanation: "الرجز هنا المقصود به الأصنام والأوثان"
             },
             {
-                question: "من الذى تم تكليفه بجمع القران؟",
+                question: "من الذى تم تكليفه بجمع القرآن؟",
                 options: {
                     a: "ابو بكر الصديق",
                     b: "عمر بن الخطاب",
                     c: "زيد بن ثابت",
                     d: "معاوية بن ابى سفيان"
                 },
-                correctAnswer: "c"
+                correctAnswer: "c",
+                explanation: "زيد بن ثابت رضي الله عنه هو من كلفه أبو بكر الصديق بجمع القرآن"
             },
             {
                 question: "من هو أول من وضع النقاط على الحروف؟ ",
                 options: {
                     a: "الخليل بن أحمد الفراهيدي",
-                    b: " الحجاج بن يوسف الثقفي",
-                    c: " نصر بن عاصم الليثي ",
-                    d: "أبو الأسود الدؤلي "
+                    b: "الحجاج بن يوسف الثقفي",
+                    c: "نصر بن عاصم الليثي",
+                    d: "أبو الأسود الدؤلي"
                 },
-                correctAnswer: "c"
+                correctAnswer: "c",
+                explanation: "نصر بن عاصم الليثي هو أول من وضع النقاط على الحروف"
             },
             {
-                question: "كم عدد السور التي ابتدأت بالحروف المقطعة (الم) ؟ ",
+                question: "كم عدد السور التي ابتدأت بالحروف المقطعة (الم)؟",
                 options: {
                     a: "4",
                     b: "5",
                     c: "6",
                     d: "7"
                 },
-                correctAnswer: "c"
+                correctAnswer: "c",
+                explanation: "ست سور في القرآن تبدأ بـ (الم)"
             },
             {
                 question: "ما هو عدد حملة العرش يوم القيامة والمذكورين في القرآن الكريم؟",
@@ -362,52 +472,66 @@
                     c: "7",
                     d: "8"
                 },
-                correctAnswer: "d"
+                correctAnswer: "d",
+                explanation: "عدد حملة العرش ثمانية كما ذكر في القرآن"
             },
             {
-                question: "ما اسم الشهر الثالث فى السنة الهجرية",
+                question: "ما اسم الشهر الثالث في السنة الهجرية؟",
                 options: {
                     a: "ربيع الاول",
                     b: "صفر",
                     c: "ذو القعدة",
                     d: "جمادى الاول"
                 },
-                correctAnswer: "a"
+                correctAnswer: "a",
+                explanation: "ربيع الأول هو الشهر الثالث في التقويم الهجري"
             },
             {
-                question: " من هو النبي الذي لقب بـ "خليل الله"؟",
+                question: 'من هو النبي الذي لقب بـ "خليل الله"؟',
                 options: {
                     a: "ابراهيم",
                     b: "موسى",
                     c: "يونس",
                     d: "محمد"
                 },
-                correctAnswer: "a"
+                correctAnswer: "a",
+                explanation: "النبي إبراهيم عليه السلام هو خليل الله"
             }
         ];
         
         // DOM Elements
-        const questionNumberEl = document.getElementById('question-number');
-        const questionEl = document.getElementById('question');
-        const optionsEl = document.getElementById('options');
-        const nextBtn = document.getElementById('next-btn');
-        const progressEl = document.getElementById('progress');
-        const resultContainerEl = document.getElementById('result-container');
-        const scoreEl = document.getElementById('score');
-        const messageEl = document.getElementById('message');
-        const emojiEl = document.getElementById('emoji');
-        const restartBtn = document.getElementById('restart-btn');
-        const quizContainerEl = document.getElementById('quiz-container');
-        const alreadyCompletedEl = document.getElementById('already-completed');
-        const previousScoreEl = document.getElementById('previous-score');
-        const viewResultsBtn = document.getElementById('view-results-btn');
-        const quizInfoEl = document.getElementById('quiz-info');
+        const elements = {
+            questionNumber: document.getElementById('question-number'),
+            question: document.getElementById('question'),
+            options: document.getElementById('options'),
+            nextBtn: document.getElementById('next-btn'),
+            prevBtn: document.getElementById('prev-btn'),
+            progress: document.getElementById('progress'),
+            resultContainer: document.getElementById('result-container'),
+            score: document.getElementById('score'),
+            message: document.getElementById('message'),
+            emoji: document.getElementById('emoji'),
+            restartBtn: document.getElementById('restart-btn'),
+            quizContainer: document.getElementById('quiz-container'),
+            alreadyCompleted: document.getElementById('already-completed'),
+            previousScore: document.getElementById('previous-score'),
+            viewResultsBtn: document.getElementById('view-results-btn'),
+            quizInfo: document.getElementById('quiz-info'),
+            timer: document.getElementById('timer'),
+            currentQ: document.getElementById('current-q'),
+            remainingQ: document.getElementById('remaining-q'),
+            scoreBreakdown: document.getElementById('score-breakdown')
+        };
         
         // Quiz state
-        let currentQuestion = 0;
-        let score = 0;
-        let userAnswers = Array(questions.length).fill(null);
-        let quizCompleted = false;
+        const state = {
+            currentQuestion: 0,
+            score: 0,
+            userAnswers: Array(questions.length).fill(null),
+            quizCompleted: false,
+            startTime: null,
+            timeSpent: 0
+        };
         
         // Initialize the quiz
         function initQuiz() {
@@ -416,147 +540,253 @@
             const today = new Date().toDateString();
             
             if (lastCompletionDate === today) {
-                // User has already completed the quiz today
-                quizCompleted = true;
-                const previousScore = localStorage.getItem('quizScore') || 0;
-                previousScoreEl.textContent = `Previous Score: ${previousScore}/${questions.length}`;
-                quizContainerEl.style.display = 'none';
-                resultContainerEl.style.display = 'none';
-                alreadyCompletedEl.style.display = 'block';
+                showAlreadyCompleted();
             } else {
-                // User hasn't completed the quiz today
-                loadQuestion();
+                startNewQuiz();
+            }
+        }
+        
+        function startNewQuiz() {
+            state.startTime = Date.now();
+            loadQuestion();
+            
+            // Update timer every second
+            setInterval(updateTimer, 1000);
+        }
+        
+        function showAlreadyCompleted() {
+            state.quizCompleted = true;
+            const previousScore = localStorage.getItem('quizScore') || 0;
+            elements.previousScore.textContent = `النقاط السابقة: ${previousScore}/${questions.length}`;
+            elements.quizContainer.style.display = 'none';
+            elements.resultContainer.style.display = 'none';
+            elements.alreadyCompleted.style.display = 'block';
+        }
+        
+        function updateTimer() {
+            if (state.startTime && !state.quizCompleted) {
+                const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                elements.timer.textContent = `الوقت: ${minutes}:${seconds.toString().padStart(2, '0')}`;
             }
         }
         
         // Load question
         function loadQuestion() {
-            const question = questions[currentQuestion];
-            questionNumberEl.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
-            questionEl.textContent = question.question;
+            const question = questions[state.currentQuestion];
+            elements.questionNumber.textContent = `السؤال ${state.currentQuestion + 1} من ${questions.length}`;
+            elements.question.textContent = question.question;
             
-            // Update progress bar
-            progressEl.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+            // Update progress indicators
+            elements.currentQ.textContent = state.currentQuestion + 1;
+            elements.remainingQ.textContent = questions.length - state.currentQuestion - 1;
+            elements.progress.style.width = `${((state.currentQuestion) / questions.length) * 100}%`;
             
             // Clear previous options
-            optionsEl.innerHTML = '';
+            elements.options.innerHTML = '';
             
             // Add options
             for (const [key, value] of Object.entries(question.options)) {
                 const option = document.createElement('div');
-                option.className = `option ${userAnswers[currentQuestion] === key ? 'selected' : ''}`;
-                option.textContent = value;
+                option.className = `option ${state.userAnswers[state.currentQuestion] === key ? 'selected' : ''}`;
+                option.innerHTML = `
+                    ${value}
+                    <span class="option-label">${key.toUpperCase()}</span>
+                `;
                 option.dataset.key = key;
                 option.addEventListener('click', selectOption);
-                optionsEl.appendChild(option);
+                elements.options.appendChild(option);
             }
             
-            // Update next button text
-            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Finish Quiz' : 'Next Question';
-            nextBtn.disabled = userAnswers[currentQuestion] === null;
+            // Update navigation buttons
+            elements.prevBtn.style.display = state.currentQuestion === 0 ? 'none' : 'block';
+            elements.nextBtn.textContent = state.currentQuestion === questions.length - 1 ? 'انهاء الاختبار' : 'التالي';
+            elements.nextBtn.disabled = state.userAnswers[state.currentQuestion] === null;
         }
         
         // Select option
         function selectOption(e) {
-            const selectedOption = e.target.dataset.key;
-            userAnswers[currentQuestion] = selectedOption;
+            const selectedOption = e.target.closest('.option').dataset.key;
+            state.userAnswers[state.currentQuestion] = selectedOption;
             
             // Update UI to show selected option
             document.querySelectorAll('.option').forEach(opt => {
                 opt.classList.remove('selected');
             });
-            e.target.classList.add('selected');
+            e.target.closest('.option').classList.add('selected');
             
             // Enable next button
-            nextBtn.disabled = false;
+            elements.nextBtn.disabled = false;
         }
         
         // Next button click
-        nextBtn.addEventListener('click', () => {
+        elements.nextBtn.addEventListener('click', () => {
             // Check if answer is correct
-            if (userAnswers[currentQuestion] === questions[currentQuestion].correctAnswer) {
-                score++;
+            if (state.userAnswers[state.currentQuestion] === questions[state.currentQuestion].correctAnswer) {
+                state.score++;
             }
             
             // Move to next question or show results
-            if (currentQuestion < questions.length - 1) {
-                currentQuestion++;
+            if (state.currentQuestion < questions.length - 1) {
+                state.currentQuestion++;
                 loadQuestion();
             } else {
-                // Mark quiz as completed in localStorage with today's date
-                const today = new Date().toDateString();
-                localStorage.setItem('quizCompletionDate', today);
-                localStorage.setItem('quizScore', score);
-                
-                showResults();
-                displayScore();
+                completeQuiz();
             }
         });
+        
+        // Previous button click
+        elements.prevBtn.addEventListener('click', () => {
+            if (state.currentQuestion > 0) {
+                state.currentQuestion--;
+                loadQuestion();
+            }
+        });
+        
+        function completeQuiz() {
+            state.quizCompleted = true;
+            state.timeSpent = Math.floor((Date.now() - state.startTime) / 1000);
+            
+            // Save to localStorage
+            const today = new Date().toDateString();
+            localStorage.setItem('quizCompletionDate', today);
+            localStorage.setItem('quizScore', state.score);
+            localStorage.setItem('quizTime', state.timeSpent);
+            
+            showResults();
+        }
         
         // Show results
         function showResults() {
-            quizContainerEl.style.display = 'none';
-            resultContainerEl.style.display = 'block';
+            elements.quizContainer.style.display = 'none';
+            elements.resultContainer.style.display = 'block';
+            
+            // Calculate and display score
+            const percentage = Math.round((state.score / questions.length) * 100);
+            elements.score.textContent = `${state.score}/${questions.length}`;
+            
+            // Set message based on score
+            const scoreData = [
+                { max: 30, emoji: '😢', message: 'استمر في المذاكرة!' },
+                { max: 50, emoji: '😐', message: 'جهد جيد!' },
+                { max: 70, emoji: '🙂', message: 'أحسنت!' },
+                { max: 90, emoji: '😊', message: 'ممتاز!' },
+                { max: 100, emoji: '🎉', message: 'نتيجة مثالية!' }
+            ];
+            
+            for (const data of scoreData) {
+                if (percentage <= data.max) {
+                    elements.emoji.textContent = data.emoji;
+                    elements.message.textContent = data.message;
+                    break;
+                }
+            }
+            
+            // Display score breakdown
+            displayScoreBreakdown();
         }
         
-        // Display score and message
-        function displayScore() {
-            scoreEl.textContent = `${score}/${questions.length}`;
-            
-            if (score <= 3) {
-                emojiEl.textContent = '😢';
-                messageEl.textContent = 'Keep practicing!';
-            } else if (score <= 5) {
-                emojiEl.textContent = '😐';
-                messageEl.textContent = 'Good effort!';
-            } else if (score <= 7) {
-                emojiEl.textContent = '🙂';
-                messageEl.textContent = 'Well done!';
-            } else if (score <= 9) {
-                emojiEl.textContent = '😊';
-                messageEl.textContent = 'Excellent!';
-            } else {
-                emojiEl.textContent = '🎉';
-                messageEl.textContent = 'Perfect Score!';
-            }
+        function displayScoreBreakdown() {
+            elements.scoreBreakdown.innerHTML = `
+                <h3>تفصيل النتائج:</h3>
+                ${questions.map((q, index) => {
+                    const userAnswer = state.userAnswers[index];
+                    const isCorrect = userAnswer === q.correctAnswer;
+                    const correctText = q.options[q.correctAnswer];
+                    
+                    return `
+                        <div class="score-item">
+                            <div>
+                                <strong>السؤال ${index + 1}:</strong>
+                                <div class="explanation">${q.explanation || ''}</div>
+                            </div>
+                            <div class="score-status ${isCorrect ? 'correct-answer' : 'incorrect-answer'}">
+                                ${isCorrect ? '✓ صحيح' : '✗ خطأ'}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
         }
         
         // Restart button (for tomorrow's quiz)
-        restartBtn.addEventListener('click', () => {
-            alert("Come back tomorrow for a new quiz! For now, you can only take the quiz once per day.");
+        elements.restartBtn.addEventListener('click', () => {
+            alert("ارجع غداً لاختبار جديد! يمكنك أداء الاختبار مرة واحدة فقط يومياً.");
         });
         
         // View results button
-        viewResultsBtn.addEventListener('click', () => {
+        elements.viewResultsBtn.addEventListener('click', () => {
             const previousScore = localStorage.getItem('quizScore') || 0;
-            scoreEl.textContent = `${previousScore}/${questions.length}`;
+            const previousTime = localStorage.getItem('quizTime') || 0;
             
-            // Set message based on score
-            if (previousScore <= 3) {
-                emojiEl.textContent = '😢';
-                messageEl.textContent = 'Keep practicing!';
-            } else if (previousScore <= 5) {
-                emojiEl.textContent = '😐';
-                messageEl.textContent = 'Good effort!';
-            } else if (previousScore <= 7) {
-                emojiEl.textContent = '🙂';
-                messageEl.textContent = 'Well done!';
-            } else if (previousScore <= 9) {
-                emojiEl.textContent = '😊';
-                messageEl.textContent = 'Excellent!';
-            } else {
-                emojiEl.textContent = '🎉';
-                messageEl.textContent = 'Perfect Score!';
+            elements.score.textContent = `${previousScore}/${questions.length}`;
+            
+            const percentage = Math.round((previousScore / questions.length) * 100);
+            const scoreData = [
+                { max: 30, emoji: '😢', message: 'استمر في المذاكرة!' },
+                { max: 50, emoji: '😐', message: 'جهد جيد!' },
+                { max: 70, emoji: '🙂', message: 'أحسنت!' },
+                { max: 90, emoji: '😊', message: 'ممتاز!' },
+                { max: 100, emoji: '🎉', message: 'نتيجة مثالية!' }
+            ];
+            
+            for (const data of scoreData) {
+                if (percentage <= data.max) {
+                    elements.emoji.textContent = data.emoji;
+                    elements.message.textContent = data.message;
+                    break;
+                }
             }
             
-            alreadyCompletedEl.style.display = 'none';
-            resultContainerEl.style.display = 'block';
+            elements.alreadyCompleted.style.display = 'none';
+            elements.resultContainer.style.display = 'block';
         });
         
         // Initialize the quiz when the page loads
         document.addEventListener('DOMContentLoaded', initQuiz);
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (state.quizCompleted) return;
+            
+            switch(e.key) {
+                case '1':
+                case 'a':
+                    selectOptionByKey('a');
+                    break;
+                case '2':
+                case 'b':
+                    selectOptionByKey('b');
+                    break;
+                case '3':
+                case 'c':
+                    selectOptionByKey('c');
+                    break;
+                case '4':
+                case 'd':
+                    selectOptionByKey('d');
+                    break;
+                case 'ArrowRight':
+                case 'Enter':
+                    if (!elements.nextBtn.disabled) {
+                        elements.nextBtn.click();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (state.currentQuestion > 0) {
+                        elements.prevBtn.click();
+                    }
+                    break;
+            }
+        });
+        
+        function selectOptionByKey(key) {
+            const option = document.querySelector(`.option[data-key="${key}"]`);
+            if (option) {
+                option.click();
+            }
+        }
     </script>
 </body>
-
 </html>
-
