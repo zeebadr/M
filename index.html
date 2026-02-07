@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mcompetition - منافسات يومية متعددة</title>
+    <title>Mcompetition - منافسات متعددة</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -226,27 +226,12 @@
             background: var(--selected-color);
         }
         
-        .card-btn.resume {
-            background: var(--quran-color);
-        }
-        
-        .card-btn.review {
-            background: #6c757d;
-        }
-        
         .card-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
         
-        .card-btn.disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        /* Quiz Container Styles (same as before with some additions) */
+        /* Quiz Container Styles */
         .quiz-container {
             background: white;
             border-radius: 20px;
@@ -426,8 +411,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
-        .result-container,
-        .already-completed {
+        .result-container {
             background: white;
             border-radius: 20px;
             padding: 40px;
@@ -553,7 +537,7 @@
         <!-- Dashboard -->
         <div class="header">
             <h1>Mcompetition</h1>
-            <p>منافسات يومية متعددة في العلوم الإسلامية</p>
+            <p>منافسات متعددة في العلوم الإسلامية - حاول بقدر ما تشاء!</p>
         </div>
         
         <div class="dashboard">
@@ -564,7 +548,7 @@
             </div>
             <div class="stats-card">
                 <i class="fas fa-check-circle"></i>
-                <h3>المسابقات المكتملة</h3>
+                <h3>المحاولات الناجحة</h3>
                 <p id="completed-competitions">0</p>
             </div>
             <div class="stats-card">
@@ -574,8 +558,8 @@
             </div>
             <div class="stats-card">
                 <i class="fas fa-clock"></i>
-                <h3>وقت اللعب اليوم</h3>
-                <p id="daily-time">0 دقيقة</p>
+                <h3>إجمالي وقت اللعب</h3>
+                <p id="total-time">0 دقيقة</p>
             </div>
         </div>
         
@@ -837,6 +821,24 @@
                         options: { a: "4", b: "5", c: "6", d: "7" },
                         correctAnswer: "c",
                         explanation: "الصحاح الستة هي: البخاري، مسلم، الترمذي، النسائي، أبو داود، ابن ماجه"
+                    },
+                    {
+                        question: "من هو صاحب كتاب صحيح البخاري؟",
+                        options: { a: "الإمام مسلم", b: "الإمام البخاري", c: "الإمام الترمذي", d: "الإمام النسائي" },
+                        correctAnswer: "b",
+                        explanation: "صحيح البخاري للإمام محمد بن إسماعيل البخاري"
+                    },
+                    {
+                        question: "ما معنى الحديث المتواتر؟",
+                        options: { a: "الحديث الضعيف", b: "الحديث المنقطع", c: "الحديث الذي رواه جمع كثير", d: "الحديث الموضوع" },
+                        correctAnswer: "c",
+                        explanation: "الحديث المتواتر هو ما رواه جمع كثير يستحيل تواطؤهم على الكذب"
+                    },
+                    {
+                        question: "من هو راوية الحديث المشهور؟",
+                        options: { a: "أبو هريرة", b: "أنس بن مالك", c: "عائشة", d: "كل ما سبق" },
+                        correctAnswer: "d",
+                        explanation: "كل هؤلاء من رواة الحديث المشهورين"
                     }
                 ]
             }
@@ -869,7 +871,7 @@
             totalPoints: document.getElementById('total-points'),
             completedCompetitions: document.getElementById('completed-competitions'),
             currentLevel: document.getElementById('current-level'),
-            dailyTime: document.getElementById('daily-time')
+            totalTime: document.getElementById('total-time')
         };
 
         // User State
@@ -883,31 +885,19 @@
             timeSpent: 0,
             totalPoints: parseInt(localStorage.getItem('totalPoints')) || 0,
             completedCompetitions: JSON.parse(localStorage.getItem('completedCompetitions')) || [],
-            dailyTime: parseInt(localStorage.getItem('dailyTime')) || 0
+            totalTime: parseInt(localStorage.getItem('totalTime')) || 0
         };
 
         // Initialize the app
         function initApp() {
             updateStats();
             renderCompetitionGrid();
-            
-            // Update daily time display
-            const savedDate = localStorage.getItem('lastVisitDate');
-            const today = new Date().toDateString();
-            
-            if (savedDate !== today) {
-                // Reset daily time if it's a new day
-                userState.dailyTime = 0;
-                localStorage.setItem('dailyTime', 0);
-                localStorage.setItem('lastVisitDate', today);
-            }
-            
-            elements.dailyTime.textContent = `${Math.floor(userState.dailyTime / 60)} دقيقة`;
         }
 
         function updateStats() {
             elements.totalPoints.textContent = userState.totalPoints;
             elements.completedCompetitions.textContent = userState.completedCompetitions.length;
+            elements.totalTime.textContent = `${Math.floor(userState.totalTime / 60)} دقيقة`;
             
             // Determine level based on points
             if (userState.totalPoints < 500) {
@@ -925,17 +915,18 @@
             elements.competitionGrid.innerHTML = '';
             
             for (const [key, competition] of Object.entries(competitions)) {
-                const completion = userState.completedCompetitions.find(c => c.id === competition.id);
-                const isCompleted = !!completion;
-                const canRetry = !competition.timeLimit || !isCompleted;
-                
                 const card = document.createElement('div');
                 card.className = 'competition-card';
                 card.dataset.id = competition.id;
                 
-                // Calculate progress for completed competitions
-                const progressPercent = isCompleted ? 
-                    (completion.score / competition.questions.length) * 100 : 0;
+                // Get best score if exists
+                const bestAttempt = userState.completedCompetitions
+                    .filter(c => c.id === competition.id)
+                    .sort((a, b) => b.score - a.score)[0];
+                
+                const bestScore = bestAttempt ? bestAttempt.score : 0;
+                const progressPercent = bestAttempt ? 
+                    (bestScore / competition.questions.length) * 100 : 0;
                 
                 card.innerHTML = `
                     <div class="card-header ${competition.category}">
@@ -956,18 +947,15 @@
                         </div>
                         <div class="card-description">
                             ${getCategoryDescription(competition.category)}
+                            ${bestAttempt ? `<br><small>أفضل نتيجة: ${bestScore}/${competition.questionsCount}</small>` : ''}
                         </div>
                     </div>
                     <div class="card-footer">
                         <span>
-                            ${isCompleted ? 
-                                `<i class="fas fa-trophy"></i> أفضل نتيجة: ${completion.bestScore}/${competition.questions.length}` :
-                                '<i class="fas fa-play-circle"></i> جديد'}
+                            <i class="fas fa-play-circle"></i> حاول بقدر ما تشاء!
                         </span>
-                        <button class="card-btn ${isCompleted ? 'review' : 'start'} ${!canRetry ? 'disabled' : ''}" 
-                                onclick="startCompetition('${competition.id}')"
-                                ${!canRetry ? 'disabled' : ''}>
-                            ${isCompleted ? 'مراجعة النتائج' : 'بدء الاختبار'}
+                        <button class="card-btn start" onclick="startCompetition('${competition.id}')">
+                            بدء الاختبار
                         </button>
                     </div>
                 `;
@@ -1027,16 +1015,15 @@
             userState.timerInterval = setInterval(() => {
                 userState.timeSpent = Math.floor((Date.now() - userState.startTime) / 1000);
                 
-                // Check time limit
+                // Check time limit (optional, can be unlimited)
                 if (userState.currentCompetition.timeLimit && 
                     userState.timeSpent >= userState.currentCompetition.timeLimit) {
                     finishCompetition();
                     return;
                 }
                 
-                const remaining = userState.currentCompetition.timeLimit - userState.timeSpent;
-                const minutes = Math.floor(remaining / 60);
-                const seconds = remaining % 60;
+                const minutes = Math.floor(userState.timeSpent / 60);
+                const seconds = userState.timeSpent % 60;
                 
                 elements.timer.textContent = `الوقت: ${minutes}:${seconds.toString().padStart(2, '0')}`;
             }, 1000);
@@ -1128,37 +1115,24 @@
 
         function updateUserStats(competitionId, score) {
             const competition = competitions[competitionId];
-            const today = new Date().toDateString();
             
             // Update total points
             const pointsEarned = Math.floor(score / competition.questions.length * competition.points);
             userState.totalPoints += pointsEarned;
             localStorage.setItem('totalPoints', userState.totalPoints);
             
-            // Update daily time
-            userState.dailyTime += userState.timeSpent;
-            localStorage.setItem('dailyTime', userState.dailyTime);
+            // Update total time
+            userState.totalTime += userState.timeSpent;
+            localStorage.setItem('totalTime', userState.totalTime);
             
-            // Update completed competitions
-            const existingIndex = userState.completedCompetitions.findIndex(c => c.id === competitionId);
-            
-            if (existingIndex !== -1) {
-                // Update existing completion
-                const existing = userState.completedCompetitions[existingIndex];
-                if (score > existing.bestScore) {
-                    existing.bestScore = score;
-                    existing.lastCompletion = today;
-                }
-            } else {
-                // Add new completion
-                userState.completedCompetitions.push({
-                    id: competitionId,
-                    bestScore: score,
-                    lastScore: score,
-                    lastCompletion: today,
-                    attempts: 1
-                });
-            }
+            // Record this attempt
+            userState.completedCompetitions.push({
+                id: competitionId,
+                score: score,
+                date: new Date().toISOString(),
+                timeSpent: userState.timeSpent,
+                pointsEarned: pointsEarned
+            });
             
             localStorage.setItem('completedCompetitions', JSON.stringify(userState.completedCompetitions));
         }
@@ -1172,11 +1146,11 @@
             
             // Set emoji and message
             const scoreData = [
-                { max: 30, emoji: '😢', message: 'استمر في المذاكرة!' },
-                { max: 50, emoji: '😐', message: 'جهد جيد!' },
-                { max: 70, emoji: '🙂', message: 'أحسنت!' },
+                { max: 30, emoji: '😢', message: 'حاول مرة أخرى!' },
+                { max: 50, emoji: '😐', message: 'ليس سيئاً!' },
+                { max: 70, emoji: '🙂', message: 'جيد!' },
                 { max: 90, emoji: '😊', message: 'ممتاز!' },
-                { max: 100, emoji: '🎉', message: 'نتيجة مثالية!' }
+                { max: 100, emoji: '🎉', message: 'مذهل!' }
             ];
             
             for (const data of scoreData) {
@@ -1213,7 +1187,7 @@
                                 <div>${q.question}</div>
                                 <small class="explanation">${q.explanation || ''}</small>
                                 <div style="margin-top: 5px;">
-                                    <small>إجابتك: ${userText}</small><br>
+                                    <small>إجابتك: <span class="${isCorrect ? 'correct-answer' : 'incorrect-answer'}">${userText}</span></small><br>
                                     <small>الإجابة الصحيحة: ${correctText}</small>
                                 </div>
                             </div>
